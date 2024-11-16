@@ -2,43 +2,43 @@ using System.Security.Cryptography;
 using System.Text;
 using FluentAssertions;
 using FsCheck;
-using Xunit;
+using VerifyXunit;
 
 namespace Email.Tests;
 
-public class EncryptionTests
+public sealed class EncryptionTests
 {
-    private readonly Encryption _encryption = new(
-        new Configuration(Key: ConvertKey("Advent Of Craft"), Iv: ConvertIv("2024"))
-    );
+    private readonly Encryption _encryption = new(new Configuration(ConvertKey("Advent Of Craft"), ConvertIv("2024")));
 
-    [Fact]
-    public void Encrypt_A_String()
-        => _encryption
-            .Encrypt("Unlock Your Potential with the Advent Of Craft Calendar!")
-            .Should()
-            .Be("L7wht/YddOoTvYvrc+wFcZhtXNvZ2cHFxq9ND27h1Ovv/aWLxN8lWv1xMsguM/R4Yodk3rn9cppI+YarggtPjA==");
+    [Theory]
+    [InlineData("EncryptedString.txt")]
+    [InlineData("EncryptedEmail.txt")]
+    public async Task Decrypt_An_Encrypted_String(string encryptedFilePath)
+    {
+        string decryptedText = _encryption.Decrypt(FileUtils.LoadFile(encryptedFilePath));
+        await Verify(decryptedText).UseFileName(encryptedFilePath);
+    }
+
+    [Theory]
+    [InlineData("DecryptedString.txt")]
+    [InlineData("DecryptedEmail.txt")]
+    public async Task Encrypt_A_String(string decryptedFilePath)
+    {
+        string encryptText = _encryption.Encrypt(FileUtils.LoadFile(decryptedFilePath));
+        await Verify(encryptText).UseFileName(decryptedFilePath);
+    }
 
     [Fact]
     public void EncryptDecrypt_ShouldReturnOriginalString()
-        // It is a Property-Based test that checks the below property
-        // for all x (x: valid string) -> decrypt(encrypt(x)) == x
-        // I'm pretty sure we will talk about this concept during our Journey 🎅
-        => Prop.ForAll<string>(
-            Arb.Default.String().Filter(str => !string.IsNullOrEmpty(str)),
-            plainText =>
-                _encryption.Decrypt(
-                    _encryption.Encrypt(plainText)
-                ) == plainText
-        ).QuickCheckThrowOnFailure();
+        // Property-Based test ensuring decrypt(encrypt(x)) == x for non-empty strings
+        => Prop.ForAll<string>(Arb.Default.String().Filter(str => !string.IsNullOrEmpty(str)),
+                               plainText => _encryption.Decrypt(_encryption.Encrypt(plainText)) == plainText)
+               .QuickCheckThrowOnFailure();
 
-    private static string ConvertKey(string key)
-        => Convert.ToBase64String(
-            SHA256.HashData(Encoding.UTF8.GetBytes(key))
-        );
+    private static string ConvertIv(string iv) => HashToBase64(iv, MD5.HashData);
 
-    private static string ConvertIv(string iv)
-        => Convert.ToBase64String(
-            MD5.HashData(Encoding.UTF8.GetBytes(iv))
-        );
+    private static string ConvertKey(string key) => HashToBase64(key, SHA256.HashData);
+
+    private static string HashToBase64(string input, Func<byte[], byte[]> hashFunc)
+        => Convert.ToBase64String(hashFunc(Encoding.UTF8.GetBytes(input)));
 }
