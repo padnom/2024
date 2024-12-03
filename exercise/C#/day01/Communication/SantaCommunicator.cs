@@ -1,28 +1,48 @@
+using LanguageExt;
+using LanguageExt.Common;
+
 namespace Communication
 {
     public class SantaCommunicator(int numberOfDaysToRest)
     {
-        public string ComposeMessage(string reindeerName, string currentLocation, int numbersOfDaysForComingBack,
-            int numberOfDaysBeforeChristmas)
+        public Either<Error,string> ComposeMessage(Reinder reinder,
+                                     NumberOfDaysBeforeChristmas numberOfDaysBeforeChristmas)
         {
-            var daysBeforeReturn = DaysBeforeReturn(numbersOfDaysForComingBack, numberOfDaysBeforeChristmas);
-            return
-                $"Dear {reindeerName}, please return from {currentLocation} in {daysBeforeReturn} day(s) to be ready and rest before Christmas.";
+            return ReturnInteneraryDays.Calculate(reinder.Location.ReturnTripDurationDays, numberOfDaysBeforeChristmas)
+                                                       .Bind(returnInteneraryDays => DaysBeforeReturn(returnInteneraryDays))
+                                                       .Bind(daysBeforeReturn => GenerateMessage(reinder, daysBeforeReturn));
         }
 
-        public bool IsOverdue(string reindeerName, string currentLocation, int numbersOfDaysForComingBack,
-            int numberOfDaysBeforeChristmas, ILogger logger)
+        private Either<Error, string> GenerateMessage(Reinder reinder, int daysBeforeReturn)
         {
-            if (DaysBeforeReturn(numbersOfDaysForComingBack, numberOfDaysBeforeChristmas) <= 0)
+            return $"Dear {reinder.Name.Value}, please return from {reinder.Location.Value} in {daysBeforeReturn
+            } day(s) to be ready and rest before Christmas.";
+        }
+
+        public bool IsOverdue(Reinder reinder,ReturnInteneraryDays returnInteneraryDays, ILogger logger)
+        {
+            return DaysBeforeReturn(returnInteneraryDays).Match(
+                                           Right: daysBeforeReturn => daysBeforeReturn < 0,
+                                           Left: _ =>
+                                           {
+                                               logger.Log($"Overdue for {reinder.Name.Value} located {reinder.Location.Value}.");
+                                               return true;
+                                           });
+        }
+
+        private Either<Error,int> DaysBeforeReturn(ReturnInteneraryDays returnInteneraryDays)
+        {
+            var daysBeforeReturn = returnInteneraryDays.NumberOfDaysBeforeChristmas.Days - returnInteneraryDays.ReturnTripDuration.Days-numberOfDaysToRest;
+
+            if (daysBeforeReturn < 0)
             {
-                logger.Log($"Overdue for {reindeerName} located {currentLocation}.");
-                return true;
+                return Error.New("Overdue");
             }
 
-            return false;
+            return daysBeforeReturn;
         }
-
-        private int DaysBeforeReturn(int numbersOfDaysForComingBack, int numberOfDaysBeforeChristmas) =>
-            numberOfDaysBeforeChristmas - numbersOfDaysForComingBack - numberOfDaysToRest;
     }
+    public record Reinder(ReinderName Name, Location Location);
+    public record Location(string Value,ReturnTripDuration ReturnTripDurationDays);
+    public record ReinderName(string Value);
 }
