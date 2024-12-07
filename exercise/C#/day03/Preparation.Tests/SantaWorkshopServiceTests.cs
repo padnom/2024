@@ -1,4 +1,8 @@
 using FluentAssertions;
+using FsCheck;
+using FsCheck.Xunit;
+using System;
+using System.Globalization;
 using Xunit;
 
 namespace Preparation.Tests
@@ -8,46 +12,83 @@ namespace Preparation.Tests
         private const string RecommendedAge = "recommendedAge";
         private readonly SantaWorkshopService _service = new();
 
-        [Fact]
-        public void PrepareGift_WithValidToy_ShouldInstantiateIt()
+        [Property]
+        public void PrepareGift_ShouldInstantiateGift_ForValidInputs(
+            NonEmptyString giftName,
+            PositiveInt weight,
+            NonEmptyString color,
+            NonEmptyString material
+        )
         {
-            const string giftName = "Bitzee";
-            const double weight = 3;
-            const string color = "Purple";
-            const string material = "Plastic";
+            double validWeight = Math.Min(weight.Get, 5);
 
-            _service.PrepareGift(giftName, weight, color, material)
+            string validGiftName = giftName.Get;
+            string validColor = color.Get;
+            string validMaterial = material.Get;
+
+            var gift = _service.PrepareGift(validGiftName, validWeight, validColor, validMaterial);
+
+            gift.Should().NotBeNull();
+
+            gift.ToString()
                 .Should()
-                .NotBeNull();
+                .ContainAll(
+                    validGiftName,
+                    validColor,
+                    validWeight.ToString(CultureInfo.InvariantCulture),
+                    validMaterial
+                );
         }
 
-        [Fact]
-        public void RetrieveAttributeOnGift()
+        [Property]
+        public void RetrieveAttributeOnGift_ShouldDefaultToZero_ForNonParsableRecommendedAge(
+            string randomAge)
         {
-            const string giftName = "Furby";
-            const double weight = 1;
-            const string color = "Multi";
-            const string material = "Cotton";
+            Prop.ForAll(
+                RecommendedAgeArbitraries.InvalidStrings(),
+                invalidAge =>
+                {
+                    var gift = new Gift("Furby", 1, "Multi", "Cotton");
 
-            var gift = _service.PrepareGift(giftName, weight, color, material);
-            gift.AddAttribute(RecommendedAge, "3");
+                    gift.AddAttribute(RecommendedAge, invalidAge);
 
-            gift.RecommendedAge()
-                .Should()
-                .Be(3);
+                    gift.RecommendedAge().Should().Be(0);
+                }).QuickCheckThrowOnFailure();
         }
 
-        [Fact]
-        public void FailsForATooHeavyGift()
+        [Property]
+        public void AddingAttributeToGift_ShouldSetAttributeCorrectly(
+            NonEmptyString giftName,
+            PositiveInt weight,
+            NonEmptyString color,
+            NonEmptyString material,
+            NonNegativeInt recommendedAge
+        )
         {
-            const string giftName = "Dog-E";
-            const double weight = 6;
-            const string color = "White";
-            const string material = "Metal";
+            var gift = _service.PrepareGift(
+                giftName.Get,
+                Math.Min(weight.Get, 5),
+                color.Get,
+                material.Get
+            );
 
-            var prepareGift = () => _service.PrepareGift(giftName, weight, color, material);
+            gift.AddAttribute(RecommendedAge, recommendedAge.Get.ToString());
+            gift.RecommendedAge().Should().Be(recommendedAge.Get);
+        }
 
-            prepareGift.Should()
+        [Property]
+        public void PrepareGift_ShouldThrowException_ForTooHeavyWeight(
+            NonEmptyString giftName,
+            NonNegativeInt weight,
+            NonEmptyString color,
+            NonEmptyString material
+        )
+        {
+            Action action = () =>
+                _service.PrepareGift(giftName.Get, weight.Get + 6, color.Get, material.Get);
+
+            action
+                .Should()
                 .Throw<ArgumentException>()
                 .WithMessage("Gift is too heavy for Santa's sleigh");
         }
