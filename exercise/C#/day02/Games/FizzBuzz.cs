@@ -12,20 +12,16 @@ public class FizzBuzz
 
     public static FizzBuzz InitGame(Dictionary<int, string> Mapping) => new(Mapping);
 
-    public  Option<string> Convert(int input) =>
+    public Option<string> Convert(int input) =>
         IsOutOfRange(input) ? Option<string>.None : ConvertSafely(input);
 
-    private string ConvertSafely(int input)
-    {
-        var result = _mapping
-                     .Filter(kvp => IsDivisibleBy(kvp.Key, input))
-                     .Map(kvp => kvp.Value)                           
-                     .Fold(string.Empty, (acc, value) => acc + value);
-
-        return string.IsNullOrEmpty(result) 
-            ? input.ToString() 
-            : result;
-    }
+    private string ConvertSafely(int input) =>
+        string.Concat(
+            _mapping
+                .Filter(kvp => IsDivisibleBy(kvp.Key, input))
+                .Map(kvp => kvp.Value)
+                .DefaultIfEmpty(input.ToString())
+        );
 
     private static bool IsDivisibleBy(int divisor, int input) => input % divisor == 0;
 
