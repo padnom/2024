@@ -14,7 +14,19 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespace);
+             .ContainInOrder(ElfId.ValueCannotBeNullOrWhitespace,
+                             ElfId.InvalidPattern,
+                             ElfId.InvalidControlKey);
+    }
+
+    [Fact]
+    public void InvalidControlKey_Is_Not_A_Valid_ID()
+    {
+        ElfId.Validate("19800768")
+             .Should()
+             .BeFail()
+             .Which.Should()
+             .ContainSingle(ElfId.InvalidControlKey);
     }
 
     [Fact]
@@ -24,7 +36,8 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.InvalidPattern);
+             .ContainInOrder(ElfId.InvalidPattern,
+                             ElfId.InvalidControlKey);
     }
 
     [Fact]
@@ -34,20 +47,20 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespace);
+             .ContainInOrder(ElfId.ValueCannotBeNullOrWhitespace,
+                             ElfId.InvalidPattern,
+                             ElfId.InvalidControlKey);
     }
 
     [Fact]
     public void Too_Long_String_Is_A_Valid_ID()
     {
-        ElfId
-            .Validate(
-                "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
-            )
-            .Should()
-            .BeFail()
-            .Which.Should()
-            .ContainSingle(ElfId.InvalidPattern);
+        ElfId.Validate("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890")
+             .Should()
+             .BeFail()
+             .Which.Should()
+             .ContainInOrder(ElfId.InvalidPattern,
+                             ElfId.InvalidControlKey);
     }
 
     [Fact]
@@ -63,17 +76,9 @@ public class EIDTests
     [Fact]
     public void ValidString_Is_A_Valid_ID()
     {
-        ElfId.Validate("19800767").Should().BeSuccess();
-    }
-    
-    [Fact]
-    public void InvalidControlKey_Is_Not_A_Valid_ID()
-    {
-        ElfId.Validate("19800768")
+        ElfId.Validate("19800767")
              .Should()
-             .BeFail()
-             .Which.Should()
-             .ContainSingle(ElfId.InvalidControlKey);
+             .BeSuccess();
     }
 
     [Fact]
@@ -83,6 +88,8 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespace);
+             .ContainInOrder(ElfId.ValueCannotBeNullOrWhitespace,
+                             ElfId.InvalidPattern,
+                             ElfId.InvalidControlKey);
     }
 }
