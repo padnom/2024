@@ -33,6 +33,9 @@ namespace EID.Tests
         public void Not_Exactly_8_Characters_Is_Not_A_Valid_ID() =>
             ElfId.Validate("1234567").Should().BeFalse();
 
+        [Fact]
+        public void ValidString_Is_A_Valid_ID() => ElfId.Validate("1980067").Should().BeTrue();
+
         internal class ElfId
         {
             internal static bool Validate(string? value)
