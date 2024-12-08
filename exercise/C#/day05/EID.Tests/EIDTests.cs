@@ -29,6 +29,10 @@ namespace EID.Tests
                 .BeFalse();
         }
 
+        [Fact]
+        public void Not_Exactly_8_Characters_Is_Not_A_Valid_ID() =>
+            EilfId.Validate("1234567").Should().BeFalse();
+
         internal class EilfId
         {
             internal static bool Validate(string? value)
