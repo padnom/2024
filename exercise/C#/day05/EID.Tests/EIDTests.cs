@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Xunit;
 
@@ -34,7 +35,7 @@ namespace EID.Tests
             ElfId.Validate("1234567").Should().BeFalse();
 
         [Fact]
-        public void ValidString_Is_A_Valid_ID() => ElfId.Validate("1980067").Should().BeTrue();
+        public void ValidString_Is_A_Valid_ID() => ElfId.Validate("19800767").Should().BeTrue();
 
         internal class ElfId
         {
@@ -44,12 +45,21 @@ namespace EID.Tests
                 {
                     return false;
                 }
-                if (value.Length != 8)
+
+                if (value.Length != 8) // Ensure exactly 8 characters
                 {
                     return false;
                 }
 
-                return true;
+                string pattern = @"^[1-3][0-9]{2}[0-9]{3}(0[1-9]|[1-8][0-9]|9[0-7])$";
+                if (!Regex.IsMatch(value, pattern))
+                {
+                    return false;
+                }
+
+                int firstSixDigits = int.Parse(value.Substring(0, 6));
+                int controlKey = int.Parse(value.Substring(6, 2));
+                return firstSixDigits % 97 == 97 - controlKey;
             }
         }
     }
