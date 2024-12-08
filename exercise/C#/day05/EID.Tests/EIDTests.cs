@@ -13,7 +13,11 @@ namespace EID.Tests
     {
         internal static bool Validate(string? value)
         {
-            throw new NotImplementedException();
+            if (value is null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
