@@ -20,7 +20,7 @@ namespace EID.Tests
     {
         internal static bool Validate(string? value)
         {
-            if (string.IsNullOrEmpty(value)
+            if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
             {
                 return false;
             }
