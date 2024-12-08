@@ -11,13 +11,16 @@ namespace EID.Tests
         [Fact]
         public void Empty_String_Is_Not_A_Valid_ID() =>
             EilfId.Validate(string.Empty).Should().BeFalse();
+
+        [Fact]
+        public void White_Space_Is_Not_A_Valid_ID() => EilfId.Validate(" ").Should().BeFalse();
     }
 
     internal class EilfId
     {
         internal static bool Validate(string? value)
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value)
             {
                 return false;
             }
