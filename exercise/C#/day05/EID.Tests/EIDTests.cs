@@ -17,10 +17,11 @@ namespace EID.Tests
     {
         internal static bool Validate(string? value)
         {
-            if (value is null)
+            if (string.IsNullOrEmpty(value))
             {
                 return false;
             }
+
             return true;
         }
     }
