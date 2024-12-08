@@ -14,18 +14,36 @@ namespace EID.Tests
 
         [Fact]
         public void White_Space_Is_Not_A_Valid_ID() => EilfId.Validate(" ").Should().BeFalse();
-    }
 
-    internal class EilfId
-    {
-        internal static bool Validate(string? value)
+        [Fact]
+        public void Too_Short_String_Is_Not_A_Valid_ID() => EilfId.Validate("1").Should().BeFalse();
+
+        [Fact]
+        public void Too_Long_String_Is_A_Valid_ID()
         {
-            if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
-            {
-                return false;
-            }
+            EilfId
+                .Validate(
+                    "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+                )
+                .Should()
+                .BeTrue();
+        }
 
-            return true;
+        internal class EilfId
+        {
+            internal static bool Validate(string? value)
+            {
+                if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
+                {
+                    return false;
+                }
+                if (value.Length < 2)
+                {
+                    return false;
+                }
+
+                return true;
+            }
         }
     }
 }
