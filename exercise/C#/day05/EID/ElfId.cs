@@ -5,22 +5,26 @@ using System.Text.RegularExpressions;
 
 namespace EID;
 
-public class ElfId
+public partial class ElfId
 {
-    public const string ValueCannotBeNullOrWhitespace = "Value cannot be null or whitespace";
+    public const string ValueCannotBeNullOrWhitespaceOrEmpty = "Value cannot be null or whitespace or empty";
     public const string InvalidControlKey = "Invalid control key";
-    public const string InvalidPattern = "Invalid pattern";
+    public const string InvalidLength = "Invalid length";
 
-    public static Validation<Error, string?> Validate(string? value)
+    public const string InvalidSex = "Invalid sex value";
+
+    public const string InvalidYear = "Invalid year value";
+
+    public const string InvalidSerialNumber = "Invalid serial number value";
+
+    public static Validation<Error, string> Validate(string? value)
     {
-        var validateNotNullOrWhitespace = ValidateNotNullOrWhitespace(value);
-        var validatePattern = MatchesPattern(value);
-        var validateControlKey = IsValidControlKey(value);
-
-        return (validateNotNullOrWhitespace, validatePattern, validateControlKey).Apply((_, _, _) => value);
+        return ValidateNotNullOrEmptyOrWhitespace(value)
+               .Bind(ValidateLength)
+               .Bind(ValidatePattern);
     }
 
-    private static Validation<Error, string> IsValidControlKey(string? value)
+    private static Validation<Error, string> ValidateControlKey(string value)
     {
         if (string.IsNullOrWhiteSpace(value)
             || value.Length < 8)
@@ -36,24 +40,55 @@ public class ElfId
             : Prelude.Fail<Error, string>(Error.New(InvalidControlKey));
     }
 
-    private static Validation<Error, string> MatchesPattern(string? value)
+    private static Validation<Error, string> ValidateLength(string? value)
     {
-        if (value == null)
-        {
-            return Prelude.Fail<Error, string>(Error.New(InvalidPattern));
-        }
-
-        var pattern = "^[1-3][0-9]{2}[0-9]{3}(0[1-9]|[1-8][0-9]|9[0-7])$";
-
-        return Regex.IsMatch(value, pattern)
+        return value?.Length == 8
             ? Prelude.Success<Error, string>(value)
-            : Prelude.Fail<Error, string>(Error.New(InvalidPattern));
+            : Prelude.Fail<Error, string>(Error.New(InvalidLength));
     }
 
-    private static Validation<Error, string> ValidateNotNullOrWhitespace(string? value)
+    private static Validation<Error, string> ValidateNotEmpty(string value)
+    {
+        return string.Empty == value
+            ? Prelude.Fail<Error, string>(Error.New(ValueCannotBeNullOrWhitespaceOrEmpty))
+            : Prelude.Success<Error, string>(value);
+    }
+
+    private static Validation<Error, string> ValidateNotNullOrEmptyOrWhitespace(string? value)
     {
         return string.IsNullOrWhiteSpace(value)
-            ? Prelude.Fail<Error, string>(Error.New(ValueCannotBeNullOrWhitespace))
+            ? Prelude.Fail<Error, string>(Error.New(ValueCannotBeNullOrWhitespaceOrEmpty))
             : Prelude.Success<Error, string>(value);
+    }
+
+    private static Validation<Error, string> ValidatePattern(string value)
+    {
+        var validateSex = ValidateSex(value);
+        var validateYear = ValidateYear(value);
+        var validateSerialNumber = ValidateSerialNumber(value);
+        var validateControlKey = ValidateControlKey(value);
+
+        return (validateSex, validateYear, validateSerialNumber, validateControlKey).Apply((_, _, _, _) => value);
+    }
+
+    private static Validation<Error, string> ValidateSerialNumber(string value)
+    {
+        return Regex.IsMatch(value.AsSpan(3, 3), "^(?!000$)[0-9]{3}$")
+            ? Prelude.Success<Error, string>(value)
+            : Prelude.Fail<Error, string>(Error.New(InvalidSerialNumber));
+    }
+
+    private static Validation<Error, string> ValidateSex(string value)
+    {
+        return Regex.IsMatch(value.Substring(0, 1), "^[1-3]$")
+            ? Prelude.Success<Error, string>(value)
+            : Prelude.Fail<Error, string>(Error.New(InvalidSex));
+    }
+
+    private static Validation<Error, string> ValidateYear(string value)
+    {
+        return Regex.IsMatch(value.Substring(1, 2), "^[0-9]{2}$")
+            ? Prelude.Success<Error, string>(value)
+            : Prelude.Fail<Error, string>(Error.New(InvalidYear));
     }
 }

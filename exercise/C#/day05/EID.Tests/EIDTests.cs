@@ -8,15 +8,24 @@ namespace EID.Tests;
 public class EIDTests
 {
     [Fact]
+    public void ElfId_Validation_Returns_All_Possible_Error_Types_For_Pattern()
+    {
+        ElfId.Validate("49800088")
+             .Should()
+             .BeFail()
+             .Which.Should()
+             .ContainInOrder(ElfId.InvalidSex, ElfId.InvalidSerialNumber, ElfId.InvalidControlKey);
+    }
+
+    [Fact]
     public void Empty_String_Is_Not_A_Valid_ID()
     {
         ElfId.Validate(string.Empty)
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainInOrder(ElfId.ValueCannotBeNullOrWhitespace,
-                             ElfId.InvalidPattern,
-                             ElfId.InvalidControlKey);
+             .ContainSingle()
+             .And.ContainSingle(error => error.Message == ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
     }
 
     [Fact]
@@ -36,8 +45,7 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainInOrder(ElfId.InvalidPattern,
-                             ElfId.InvalidControlKey);
+             .ContainInOrder(ElfId.InvalidLength);
     }
 
     [Fact]
@@ -47,9 +55,9 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainInOrder(ElfId.ValueCannotBeNullOrWhitespace,
-                             ElfId.InvalidPattern,
-                             ElfId.InvalidControlKey);
+             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
+
+        ;
     }
 
     [Fact]
@@ -59,8 +67,7 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainInOrder(ElfId.InvalidPattern,
-                             ElfId.InvalidControlKey);
+             .ContainSingle(ElfId.InvalidLength);
     }
 
     [Fact]
@@ -70,7 +77,7 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(error => error.Message == ElfId.InvalidPattern);
+             .ContainSingle(error => error.Message == ElfId.InvalidLength);
     }
 
     [Fact]
@@ -88,8 +95,29 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainInOrder(ElfId.ValueCannotBeNullOrWhitespace,
-                             ElfId.InvalidPattern,
-                             ElfId.InvalidControlKey);
+             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
+
+        ;
+    }
+
+    [Fact]
+    public void WrongSerialNumber_Is_Not_A_Valid_ID()
+    {
+        ElfId.Validate("19800074")
+             .Should()
+             .BeFail()
+             .Which.Should()
+             .ContainSingle()
+             .And.ContainSingle(error => error.Message == ElfId.InvalidSerialNumber);
+    }
+
+    [Fact]
+    public void WrongSex_Is_Not_A_Valid_ID()
+    {
+        ElfId.Validate("49800788")
+             .Should()
+             .BeFail()
+             .Which.Should()
+             .ContainSingle(ElfId.InvalidSex);
     }
 }
