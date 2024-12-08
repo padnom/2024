@@ -26,7 +26,7 @@ namespace EID.Tests
                     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
                 )
                 .Should()
-                .BeTrue();
+                .BeFalse();
         }
 
         internal class EilfId
@@ -37,7 +37,7 @@ namespace EID.Tests
                 {
                     return false;
                 }
-                if (value.Length < 2)
+                if (value.Length < 2 || value.Length > 8)
                 {
                     return false;
                 }
