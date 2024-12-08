@@ -6,8 +6,14 @@ namespace EID.Tests
     public class EIDTests
     {
         [Fact]
-        public void A_First_Test() 
-            => 43.Should()
-                .Be(42, "it is universal answer");
+        public void Null_Is_Not_A_Valid_ID() => EilfId.Validate(null).Should().BeFalse();
+    }
+
+    internal class EilfId
+    {
+        internal static bool Validate(string? value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
