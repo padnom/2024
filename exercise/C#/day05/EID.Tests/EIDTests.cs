@@ -41,7 +41,7 @@ namespace EID.Tests
                 {
                     return false;
                 }
-                if (value.Length < 2 || value.Length > 8)
+                if (value.Length != 8)
                 {
                     return false;
                 }
