@@ -41,22 +41,26 @@ namespace EID.Tests
         {
             internal static bool Validate(string? value)
             {
-                if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
+                if (
+                    string.IsNullOrWhiteSpace(value)
+                    || !MatchesPattern(value)
+                    || !IsValidControlKey(value)
+                )
                 {
                     return false;
                 }
 
-                if (value.Length != 8) // Ensure exactly 8 characters
-                {
-                    return false;
-                }
+                return true;
+            }
 
+            private static bool MatchesPattern(string value)
+            {
                 string pattern = @"^[1-3][0-9]{2}[0-9]{3}(0[1-9]|[1-8][0-9]|9[0-7])$";
-                if (!Regex.IsMatch(value, pattern))
-                {
-                    return false;
-                }
+                return Regex.IsMatch(value, pattern);
+            }
 
+            private static bool IsValidControlKey(string value)
+            {
                 int firstSixDigits = int.Parse(value.Substring(0, 6));
                 int controlKey = int.Parse(value.Substring(6, 2));
                 return firstSixDigits % 97 == 97 - controlKey;
