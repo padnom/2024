@@ -35,7 +35,8 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.InvalidControlKey);
+             .ContainSingle()
+             .And.ContainSingle(error => error.Message == ElfId.InvalidControlKey);
     }
 
     [Fact]
@@ -55,7 +56,8 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
+             .ContainSingle()
+             .And.ContainSingle(error => error.Message == ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
 
         ;
     }
@@ -67,7 +69,8 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.InvalidLength);
+             .ContainSingle()
+             .And.ContainSingle(error => error.Message == ElfId.InvalidLength);
     }
 
     [Fact]
@@ -95,7 +98,8 @@ public class EIDTests
              .Should()
              .BeFail()
              .Which.Should()
-             .ContainSingle(ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
+             .ContainSingle()
+             .And.ContainSingle(error => error.Message == ElfId.ValueCannotBeNullOrWhitespaceOrEmpty);
 
         ;
     }
