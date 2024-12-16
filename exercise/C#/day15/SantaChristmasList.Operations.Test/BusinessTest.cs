@@ -31,7 +31,7 @@ public class BusinessTest
         var sut = new Business(_factory, _inventory, _wishList);
         var sleigh = sut.LoadGiftsInSleigh(_john);
 
-        sleigh.ContainsKey(_john).Should().BeFalse();
+        sleigh[_john].Should().Be("Missing gift: Child wasn't nice this year!");
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class BusinessTest
         var sut = new Business(_factory, _inventory, _wishList);
         var sleigh = sut.LoadGiftsInSleigh(_john);
 
-        sleigh.ContainsKey(_john).Should().BeFalse();
+        sleigh[_john].Should().Be("Missing gift: Gift wasn't manufactured!");
     }
 
     [Fact]
@@ -52,6 +52,6 @@ public class BusinessTest
         var sut = new Business(_factory, _inventory, _wishList);
         var sleigh = sut.LoadGiftsInSleigh(_john);
 
-        sleigh.ContainsKey(_john).Should().BeFalse();
+        sleigh[_john].Should().Be("Missing gift: The gift has probably been misplaced by the elves!");
     }
 }
