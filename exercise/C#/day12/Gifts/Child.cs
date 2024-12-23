@@ -2,19 +2,20 @@
 
 public class Child
 {
-    public string Name { get; }
-    public Behavior Behavior { get; }
-    public List<Toy> Wishlist { get; private set; }
+    public readonly string Name;
+    private readonly Behavior _behavior;
+    private WishList _wishList;
 
-    public Child(string name, Behavior behavior)
+    private Child(string name, Behavior behavior, WishList wishList)
     {
         Name = name;
-        Behavior = behavior;
-        Wishlist = [];
+        _behavior = behavior;
+        _wishList = wishList;
     }
 
-    public void SetWishList(Toy firstChoice, Toy secondChoice, Toy thirdChoice)
-        => Wishlist = [firstChoice, secondChoice, thirdChoice];
+    public static Child CreateChild(string name, Behavior behavior,WishList wishList) => new(name, behavior,wishList);
+
+    public Option<Toy> GetToy() => _wishList.GetChoice(_behavior);
 }
 public enum Behavior
 {

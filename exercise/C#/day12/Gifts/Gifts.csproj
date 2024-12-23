@@ -15,4 +15,9 @@
     <None Remove="Rental\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions.LanguageExt" Version="0.5.0" />
+    <PackageReference Include="LanguageExt.Core" Version="4.4.9" />
+  </ItemGroup>
+
 </Project>
