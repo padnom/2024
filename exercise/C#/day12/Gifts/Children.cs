@@ -3,13 +3,8 @@
 public sealed class Children
 {
     private readonly List<Child> _childrenRepository = [];
-    
-    public  Option<Child> GetChild(string name)
-    {
-        return _childrenRepository.FirstOrDefault(c => c.Name == name) == null 
-            ? Prelude.None 
-            : _childrenRepository.FirstOrDefault(c => c.Name == name);
-    }
+
+    public Option<Child> GetChild(string name) => _childrenRepository.Find(c => c.Name == name) ?? Option<Child>.None;
 
     public  void AddChild(Child child) => _childrenRepository.Add(child);
 }
