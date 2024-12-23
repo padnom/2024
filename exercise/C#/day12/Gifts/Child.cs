@@ -3,10 +3,10 @@
 public class Child
 {
     public string Name { get; }
-    public string Behavior { get; }
+    public Behavior Behavior { get; }
     public List<Toy> Wishlist { get; private set; }
 
-    public Child(string name, string behavior)
+    public Child(string name, Behavior behavior)
     {
         Name = name;
         Behavior = behavior;
@@ -15,4 +15,10 @@ public class Child
 
     public void SetWishList(Toy firstChoice, Toy secondChoice, Toy thirdChoice)
         => Wishlist = [firstChoice, secondChoice, thirdChoice];
+}
+public enum Behavior
+{
+    Naughty,
+    Nice,
+    VeryNice
 }

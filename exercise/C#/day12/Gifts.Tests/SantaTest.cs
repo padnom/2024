@@ -12,7 +12,7 @@ public class SantaTest
     [Fact]
     public void GivenNaughtyChildWhenDistributingGiftsThenChildReceivesThirdChoice()
     {
-        var bobby = new Child("bobby", "naughty");
+        var bobby = new Child("bobby", Behavior.Naughty);
         bobby.SetWishList(Playstation, Plush, Ball);
         var santa = new Santa();
         santa.AddChild(bobby);
@@ -24,7 +24,7 @@ public class SantaTest
     [Fact]
     public void GivenNiceChildWhenDistributingGiftsThenChildReceivesSecondChoice()
     {
-        var bobby = new Child("bobby", "nice");
+        var bobby = new Child("bobby", Behavior.Nice);
         bobby.SetWishList(Playstation, Plush, Ball);
         var santa = new Santa();
         santa.AddChild(bobby);
@@ -36,7 +36,7 @@ public class SantaTest
     [Fact]
     public void GivenVeryNiceChildWhenDistributingGiftsThenChildReceivesFirstChoice()
     {
-        var bobby = new Child("bobby", "very nice");
+        var bobby = new Child("bobby", Behavior.VeryNice);
         bobby.SetWishList(Playstation, Plush, Ball);
         var santa = new Santa();
         santa.AddChild(bobby);
@@ -49,7 +49,7 @@ public class SantaTest
     public void GivenNonExistingChildWhenDistributingGiftsThenExceptionThrown()
     {
         var santa = new Santa();
-        var bobby = new Child("bobby", "very nice");
+        var bobby = new Child("bobby", Behavior.VeryNice);
         bobby.SetWishList(Playstation, Plush, Ball);
         santa.AddChild(bobby);
 
