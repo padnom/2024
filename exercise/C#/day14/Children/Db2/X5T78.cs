@@ -2,6 +2,31 @@ namespace Children.Db2
 {
     public class X5T78
     {
+        public X5T78()
+        {
+        }
+
+        public X5T78(string id, string n1, string n3, string cityOfBirthPc, string personBd, string salutation, string typePc, string servGenderTypePc, string declaredMonthlySalaryC, string legalDocumentExpirationDate1C, string legalDocumentIssuingCountry1C, string legalDocumentName1C, string legalDocumentNumber1C, string stNum, string stName, string stC, string stCid)
+        {
+            Id = id;
+            N_1 = n1;
+            N_3 = n3;
+            CityOfBirth__pc = cityOfBirthPc;
+            Person_BD = personBd;
+            Salutation = salutation;
+            Type_pc = typePc;
+            Serv__Gender__TYPE_pc = servGenderTypePc;
+            DeclaredMonthlySalary__c = declaredMonthlySalaryC;
+            LegalDocumentExpirationDate1__c = legalDocumentExpirationDate1C;
+            LegalDocumentIssuingCountry1__c = legalDocumentIssuingCountry1C;
+            LegalDocumentName1__c = legalDocumentName1C;
+            LegalDocumentNumber1__c = legalDocumentNumber1C;
+            ST_Num = stNum;
+            ST____Name = stName;
+            ST_C = stC;
+            ST_CID = stCid;
+        }
+
         public string Id { get; set; }
         public string N_1 { get; set; }
         public string N_2 { get; set; }

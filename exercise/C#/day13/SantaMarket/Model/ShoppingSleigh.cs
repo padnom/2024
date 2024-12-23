@@ -2,7 +2,7 @@ namespace SantaMarket.Model
 {
     public class ShoppingSleigh
     {
-        private readonly List<ProductQuantity> _items = [];
+        private readonly List<ProductQuantity> _items = new();
         private readonly Dictionary<Product, double> _productQuantities = new();
 
         public IReadOnlyList<ProductQuantity> Items() => _items.AsReadOnly();
@@ -33,34 +33,40 @@ namespace SantaMarket.Model
                 {
                     var offer = offers[product];
                     var unitPrice = catalog.GetUnitPrice(product);
-                    var quantityAsInt = (int) quantity;
+                    var quantityAsInt = (int)quantity;
                     Discount? discount = null;
-                    var x = offer.OfferType == SpecialOfferType.ThreeForTwo ? 3 : 1;
 
-                    if (offer.OfferType == SpecialOfferType.TwoForAmount && quantityAsInt >= 2)
+                    switch (offer.OfferType)
                     {
-                        var total = offer.Argument * (quantityAsInt / 2) + (quantityAsInt % 2) * unitPrice;
-                        discount = new Discount(product, "2 for " + offer.Argument, -(unitPrice * quantity - total));
-                    }
+                        case SpecialOfferType.TwoForAmount:
+                            if (quantityAsInt >= 2)
+                            {
+                                discount = ComputeXForYDiscount(product, quantityAsInt, 2, unitPrice, offer.Argument);
+                            }
+                            break;
 
-                    if (offer.OfferType == SpecialOfferType.ThreeForTwo && quantityAsInt > 2)
-                    {
-                        var discountAmount = quantity * unitPrice -
-                                             ((quantityAsInt / 3 * 2 * unitPrice) + (quantityAsInt % 3) * unitPrice);
-                        discount = new Discount(product, "3 for 2", -discountAmount);
-                    }
+                        case SpecialOfferType.ThreeForTwo:
+                            if (quantityAsInt >= 3)
+                            {
+                                discount = ComputeXForYDiscount(product, quantityAsInt, 3, unitPrice, 2 * unitPrice);
+                            }
+                            break;
 
-                    if (offer.OfferType == SpecialOfferType.TenPercentDiscount)
-                    {
-                        discount = new Discount(product, offer.Argument + "% off",
-                            -quantity * unitPrice * offer.Argument / 100.0);
-                    }
+                        case SpecialOfferType.FiveForAmount:
+                            if (quantityAsInt >= 5)
+                            {
+                                discount = ComputeXForYDiscount(product, quantityAsInt, 5, unitPrice, offer.Argument);
+                            }
+                            break;
 
-                    if (offer.OfferType == SpecialOfferType.FiveForAmount && quantityAsInt >= 5)
-                    {
-                        var discountTotal = unitPrice * quantity -
-                                            (offer.Argument * (quantityAsInt / 5) + (quantityAsInt % 5) * unitPrice);
-                        discount = new Discount(product, "5 for " + offer.Argument, -discountTotal);
+                        case SpecialOfferType.TenPercentDiscount:
+                            discount = new Discount(product, $"{offer.Argument}% off",
+                                -quantity * unitPrice * offer.Argument / 100.0);
+                            break;
+
+                        default:
+                            // Autres cas ou pas d'offre
+                            break;
                     }
 
                     if (discount != null)
@@ -69,6 +75,14 @@ namespace SantaMarket.Model
                     }
                 }
             }
+        }
+
+        private Discount ComputeXForYDiscount(Product product, int quantity, int x, double unitPrice, double yAmount)
+        {
+            int setsOfX = quantity / x; // Nombre de lots X
+            double total = setsOfX * yAmount + (quantity % x) * unitPrice; // Total avec réduction
+            double discountAmount = quantity * unitPrice - total; // Montant de la réduction
+            return new Discount(product, $"{x} for {yAmount}", -discountAmount);
         }
     }
 }
