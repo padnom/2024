@@ -1,26 +1,26 @@
+using LanguageExt;
+using LanguageExt.Common;
+using LanguageExt.UnsafeValueAccess;
+using static LanguageExt.Prelude;
 namespace SantaChristmasList.Operations;
 
 public class Business(Factory factory, Inventory inventory, WishList wishList)
 {
     public Sleigh LoadGiftsInSleigh(params Child[] children)
     {
-        var list = new Sleigh();
-        foreach (var child in children)
+        var sleight = new Sleigh();
+
+        Seq(children.AsEnumerable()).Iter(child =>
         {
-            var gift = wishList.IdentifyGift(child);
-            if (gift is not null)
-            {
-                var manufactured = factory.FindManufacturedGift(gift);
-                if (manufactured is not null)
-                {
-                    var finalGift = inventory.PickUpGift(manufactured.BarCode);
-                    if (finalGift is not null)
-                    {
-                        list.Add(child, $"Gift: {finalGift.Name} has been loaded!");
-                    }
-                }
-            }
-        }
-        return list;
+            wishList.IdentifyGift(child)
+                    .Bind(g => factory.FindManufacturedGift(g))
+                    .Bind(m => inventory.PickUpGift(m.BarCode))
+                    .Match(
+                        error => sleight.Add(child, error.Message),
+                        gift => sleight.Add(child, $"Gift: {gift.Name} has been loaded!")
+                    );
+        });
+
+        return sleight;
     }
 }
