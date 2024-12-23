@@ -151,5 +151,9 @@ namespace SantaMarket.Tests
                 .OnlyContain(item => item.Equals(expectedReceiptItem));
             receipt.GetDiscounts().Should().ContainSingle().Which.Should().BeEquivalentTo(expectedDiscount);
         }
+        
+        
     }
+    
+    
 }
